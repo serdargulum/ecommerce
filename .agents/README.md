@@ -28,6 +28,38 @@ dosyasını okur; böylece her seferinde kod tabanını sıfırdan keşfetmek zo
    davranışı belgele.
 4. Yukarıdaki tabloya yeni satırı ekle.
 
+## MCP sunucuları
+
+Proje kökündeki [`.mcp.json`](../.mcp.json) dosyası, proje kapsamlı MCP sunucularını tanımlar.
+Claude Code bu dosyayı otomatik bulur (ilk açılışta güven onayı ister); Cursor kullanıyorsan aynı
+`mcpServers` bloğunu `.cursor/mcp.json` içine kopyala.
+
+| Sunucu | Ne sağlar | Gereksinim |
+| --- | --- | --- |
+| `github` | Issue/PR, kod arama, commit ve repo işlemleri (46 araç) | Docker + `GITHUB_PERSONAL_ACCESS_TOKEN` |
+| `postgres` | Şema inceleme, salt-okunur SQL, index/sorgu analizi | Docker + çalışan `tatlibisey-db` |
+| `playwright` | Tarayıcıyı açıp vitrin/panel akışlarını gerçek tarayıcıda doğrulama | Node (`npx`) |
+| `context7` | Next.js, EF Core gibi kütüphanelerin güncel dokümantasyonu | İnternet (uzak HTTP sunucusu) |
+
+Postgres sunucusu `crystaldba/postgres-mcp` imajını `--access-mode=restricted` ile çalıştırır;
+`DATABASE_URI` içindeki `host.docker.internal` macOS/Windows Docker Desktop içindir. Linux'ta
+`args` dizisine `--add-host=host.docker.internal:host-gateway` ekle. Veritabanı container'ı kapalıyken
+bu sunucu bağlanamaz; `docker start tatlibisey-db` yeterlidir.
+
+GitHub token'ı **repoya yazılmaz**. `repo` (ve organizasyon kullanıyorsan `read:org`) kapsamlı bir
+fine-grained PAT oluşturup kabuk profilinde tanımla:
+
+```bash
+export GITHUB_PERSONAL_ACCESS_TOKEN=github_pat_...
+```
+
+MCP istemcisi `${GITHUB_PERSONAL_ACCESS_TOKEN}` ifadesini bu ortam değişkeninden okur. Token yoksa
+sunucu açılır ama GitHub çağrıları yetkisiz döner. Playwright sunucusu ilk kullanımda tarayıcı
+gerektirebilir: `npx playwright install chrome`.
+
+Playwright ve Postgres sunucuları gerçekten çalıştırılıp MCP el sıkışması doğrulandı; GitHub sunucusu
+geçersiz token ile 46 aracı listeledi (gerçek çağrılar için geçerli PAT gerekir).
+
 ## Notlar
 
 - Ajan talimatları Türkçe ürün diliyle uyumlu olacak şekilde Türkçe yazılır; kod, komut ve
