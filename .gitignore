@@ -1,0 +1,27 @@
+# .NET
+backend/bin/
+backend/obj/
+*.user
+*.suo
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/*.tsbuildinfo
+npm-debug.log*
+
+# Ortam dosyaları
+.env
+.env.local
+.env.*.local
+
+# Yüklenen görseller (seed görselleri hariç)
+backend/wwwroot/uploads/*
+!backend/wwwroot/uploads/seed/
+
+# Editör / işletim sistemi
+.DS_Store
+.vscode/
+.idea/
+*.log
