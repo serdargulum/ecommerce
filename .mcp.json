@@ -26,12 +26,15 @@
         "--access-mode=restricted"
       ],
       "env": {
-        "DATABASE_URI": "postgresql://postgres:postgres@host.docker.internal:5432/tatlibisey"
+        "DATABASE_URI": "${POSTGRES_CONNECTION_STRING}"
       }
     },
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest"]
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
     },
     "context7": {
       "type": "http",
