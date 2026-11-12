@@ -1,0 +1,42 @@
+# syntax=docker/dockerfile:1
+
+# --- Derleme aşaması -------------------------------------------------------
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Önce yalnızca proje dosyası: katman önbelleği paket geri yüklemesini korur.
+COPY backend/Ecommerce.Api.csproj backend/
+RUN dotnet restore backend/Ecommerce.Api.csproj
+
+COPY backend/ backend/
+RUN dotnet publish backend/Ecommerce.Api.csproj \
+    -c Release \
+    -o /app/publish \
+    /p:UseAppHost=false
+
+# --- Çalışma aşaması ------------------------------------------------------
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+WORKDIR /app
+
+# Healthcheck için curl (imajda varsayılan olarak yok).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV ASPNETCORE_URLS=http://+:8080 \
+    ASPNETCORE_ENVIRONMENT=Production \
+    DOTNET_RUNNING_IN_CONTAINER=true
+
+COPY --from=build /app/publish ./
+
+# Seed görselleri imajda ayrı durur; uploads volume'ü boşsa entrypoint kopyalar.
+COPY backend/wwwroot/uploads/seed ./seed-images
+RUN mkdir -p /app/wwwroot/uploads/seed
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=40s --retries=6 \
+    CMD curl -fsS http://localhost:8080/health || exit 1
+
+# Volume ilk kez bağlandığında seed görsellerini geri yükle, sonra API'yi başlat.
+CMD ["sh", "-c", "cp -n /app/seed-images/* /app/wwwroot/uploads/seed/ 2>/dev/null || true; exec dotnet Ecommerce.Api.dll"]

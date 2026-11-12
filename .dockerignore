@@ -1,0 +1,28 @@
+# Sürüm kontrolü / editör
+.git
+.github
+.agents
+**/.DS_Store
+**/*.log
+
+# .NET derleme çıktıları
+**/bin
+**/obj
+
+# Node / Next.js
+**/node_modules
+**/.next
+**/*.tsbuildinfo
+
+# Ortam dosyaları
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Çalışma zamanında yüklenen görseller (seed görselleri imaja girer)
+backend/wwwroot/uploads/*
+!backend/wwwroot/uploads/seed
+!backend/wwwroot/uploads/seed/**
+
+# Belgeler
+README.md
